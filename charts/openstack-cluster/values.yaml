@@ -26,7 +26,7 @@ machineImageId:
 machineSSHKeyName:
 
 # The prefix used for project labels and annotations
-projectPrefix: capi.tucows.clouds
+projectPrefix: capi.tucows.cloud
 
 # Any extra annotations to add to the cluster
 clusterAnnotations: {}
