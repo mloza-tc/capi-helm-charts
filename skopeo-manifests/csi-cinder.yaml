@@ -1,0 +1,16 @@
+registry.k8s.io:
+  images:
+    provider-os/cinder-csi-plugin:
+    - v1.30.0
+    sig-storage/csi-attacher:
+    - v4.4.2
+    sig-storage/csi-node-driver-registrar:
+    - v2.9.2
+    sig-storage/csi-provisioner:
+    - v3.6.2
+    sig-storage/csi-resizer:
+    - v1.9.2
+    sig-storage/csi-snapshotter:
+    - v6.3.2
+    sig-storage/livenessprobe:
+    - v2.11.0

@@ -1,0 +1,117 @@
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" -}}
+{{- with .Values.controlPlane.nodeLabels }}
+initConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+joinConfiguration: {{ include "openstack-cluster.nodeRegistration.nodeLabels" . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" -}}
+{{- $ctx := index . 0 }}
+{{- $osDistro := index . 1 }}
+{{- $kubeProxyConfigurationPath := eq $osDistro "flatcar" | ternary "/etc/kube-proxy-configuration.yaml" "/run/kubeadm/kube-proxy-configuration.yaml" }}
+{{- $kubeadmPath := eq $osDistro "flatcar" | ternary "/etc/kubeadm.yml" "/run/kubeadm/kubeadm.yaml" }}
+{{- with $ctx.kubeProxyConfiguration }}
+files:
+  - path: {{ $kubeProxyConfigurationPath }}
+    content: |
+      ---
+      apiVersion: kubeproxy.config.k8s.io/v1alpha1
+      kind: KubeProxyConfiguration
+      {{- toYaml . | nindent 6 }}
+    owner: root:root
+    permissions: "0644"
+preKubeadmCommands:
+  - cat {{ $kubeProxyConfigurationPath }} >> {{ $kubeadmPath }}
+{{- end }}
+{{- end }}
+
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" -}}
+clusterConfiguration:
+  etcd:
+    local:
+      dataDir: {{ .Values.etcd.dataDir }}
+      extraArgs: {{ toYaml .Values.etcd.extraArgs | nindent 8 }}
+{{- if .Values.etcd.blockDevice }}
+# Tell kubeadm to ignore the fact that the etcd datadir contains lost+found
+initConfiguration:
+  nodeRegistration:
+    ignorePreflightErrors:
+      - diravailable-{{ replace "/" "-" .Values.etcd.dataDir }}
+joinConfiguration:
+  nodeRegistration:
+    ignorePreflightErrors:
+      - diravailable-{{ replace "/" "-" .Values.etcd.dataDir }}
+diskSetup:
+  filesystems:
+    - device: /dev/disk/openstack/by-tag/etcd
+      filesystem: ext4
+      label: etcd_disk
+mounts:
+  - - LABEL=etcd_disk
+    - {{ .Values.etcd.dataDir }}
+{{- end }}
+{{- end }}
+
+{{/*
+  NOTE(mkjpryor)
+  When Cilium is enabled with the kube-proxy replacement, we need to skip kube-proxy
+*/}}
+{{- define "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" -}}
+{{-
+  if and
+    .Values.addons.enabled
+    (dig "cni" "enabled" true .Values.addons)
+    (dig "cni" "type" "calico" .Values.addons | eq "cilium")
+    (dig "cni" "cilium" "release" "values" "kubeProxyReplacement" true .Values.addons)
+}}
+initConfiguration:
+  skipPhases:
+    - addon/kube-proxy
+{{- end }}
+{{- end }}
+
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+  name: {{ include "openstack-cluster.componentName" (list . "control-plane") }}
+  labels: {{ include "openstack-cluster.componentLabels" (list . "control-plane") | nindent 4 }}
+  annotations:
+    # We let Cluster API clean up the control plane resource
+    # Deleting it ourselves, which CAPI is not expecting, can cause some nasty race conditions
+    helm.sh/resource-policy: keep
+    # NOTE: Argo won't delete this object itself as it has an owner reference to the cluster
+spec:
+  version: v{{ .Values.controlPlane.kubernetesVersion | default .Values.kubernetesVersion | required "One of .Values.controlPlane.kubernetesVersion or .Values.kubernetesVersion is required" | trimPrefix "v" }}
+  replicas: {{ .Values.controlPlane.machineCount }}
+  remediationStrategy: {{ toYaml .Values.controlPlane.remediationStrategy | nindent 4 }}
+  rolloutStrategy: {{ toYaml .Values.controlPlane.rolloutStrategy | nindent 4 }}
+  machineTemplate:
+    metadata:
+      labels: {{ include "openstack-cluster.componentSelectorLabels" (list . "control-plane") | nindent 8 }}
+    infrastructureRef:
+      kind: OpenStackMachineTemplate
+      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+      name: {{ include "openstack-cluster.controlplane.mt.name" . }}
+      namespace: {{ .Release.Namespace }}
+    nodeDrainTimeout: {{ .Values.controlPlane.nodeDrainTimeout }}
+    nodeVolumeDetachTimeout: {{ .Values.controlPlane.nodeVolumeDetachTimeout }}
+    nodeDeletionTimeout: {{ .Values.controlPlane.nodeDeletionTimeout }}
+  kubeadmConfigSpec: {{
+    omit
+      (
+        list
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.nodeLabels" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.etcd" . | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.cilium" . | fromYaml)
+          (include "openstack-cluster.kubeadmConfigSpec" (list . .Values.controlPlane.kubeadmConfigSpec) | fromYaml)
+          (include "openstack-cluster.osDistroKubeadmConfigSpec" (list . ) | fromYaml)
+          (include "openstack-cluster.patchConfigSpec"  (list .) | fromYaml)
+          (include "openstack-cluster.controlplane.kubeadmConfigSpec.kubeProxyConfiguration" (list .Values.controlPlane.kubeadmConfigSpec .Values.osDistro) | fromYaml) |
+        include "openstack-cluster.mergeConcatMany" |
+        fromYaml
+      )
+      "kubeProxyConfiguration" |
+    toYaml |
+    nindent 4
+  }}

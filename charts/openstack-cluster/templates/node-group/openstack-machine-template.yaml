@@ -1,0 +1,91 @@
+{{/*
+  Machine templates are immutable, so we need to make a new one when the spec changes.
+  To do this, we create a new template whenever the checksum of the spec changes.
+*/}}
+{{- define "openstack-cluster.nodegroup.mt.spec" -}}
+{{- $ctx := index . 0 -}}
+{{- $nodeGroup := index . 1 -}}
+template:
+  spec:
+    identityRef:
+      kind: Secret
+      name: {{ include "openstack-cluster.cloudCredentialsSecretName" $ctx }}
+    cloudName: openstack
+    flavor: {{ $nodeGroup.machineFlavor | required (printf "no flavor specified for node group '%s'" $nodeGroup.name) }}
+    {{- with $ctx.Values.machineSSHKeyName }}
+    sshKeyName: {{ . }}
+    {{- end }}
+    {{- if or $nodeGroup.machineConfigDrive $nodeGroup.additionalBlockDevices }}
+    configDrive: true
+    {{- end }}
+    {{- if $nodeGroup.machineRootVolume.diskSize }}
+    rootVolume: {{ toYaml $nodeGroup.machineRootVolume | nindent 6 }}
+    {{- end }}
+    {{- if $nodeGroup.machineImageId }}
+    imageUUID: {{ $nodeGroup.machineImageId }}
+    {{- else if $nodeGroup.machineImage }}
+    image: {{ tpl $nodeGroup.machineImage $ctx }}
+    {{- else if $ctx.Values.machineImageId }}
+    imageUUID: {{ $ctx.Values.machineImageId }}
+    {{- else if $ctx.Values.machineImage }}
+    image: {{ tpl $ctx.Values.machineImage $ctx }}
+    {{- else }}
+    {{- fail "Either nodeGroupDefaults.machineImageId, nodeGroupDefaults.machineImage, machineImageId or machineImage is required" }}
+    {{- end }}
+    {{- with $nodeGroup.additionalBlockDevices }}
+    additionalBlockDevices:
+      {{- range $name, $blockDevice := . }}
+      - name: {{ $name }}
+        sizeGiB: {{ required "size is required for a block device" $blockDevice.size }}
+        storage:
+          type: {{ default "Volume" $blockDevice.type }}
+          {{- if or $blockDevice.volumeType $blockDevice.availabilityZone }}
+          volume:
+            {{- with $blockDevice.volumeType }}
+            type: {{ . }}
+            {{- end }}
+            {{- with $blockDevice.availabilityZone }}
+            availabilityZone: {{ . }}
+            {{- end }}
+          {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- with $nodeGroup.machineNetworking.ports }}
+    ports: {{ toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $nodeGroup.serverGroupId }}
+    serverGroupID: {{ . }}
+    {{- end }}
+{{- end }}
+
+{{- define "openstack-cluster.nodegroup.mt.checksum" -}}
+{{- include "openstack-cluster.nodegroup.mt.spec" . | sha256sum }}
+{{- end }}
+
+{{- define "openstack-cluster.nodegroup.mt.name" -}}
+{{- $ctx := index . 0 }}
+{{- $nodeGroup := index . 1 }}
+{{- $checksum := include "openstack-cluster.nodegroup.mt.checksum" . }}
+{{- include "openstack-cluster.componentName" (list $ctx $nodeGroup.name) }}-{{ trunc 8 $checksum }}
+{{- end }}
+
+{{- range $nodeGroupOverrides := .Values.nodeGroups }}
+{{- $nodeGroup := deepCopy $.Values.nodeGroupDefaults | mustMerge $nodeGroupOverrides }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
+kind: OpenStackMachineTemplate
+metadata:
+  name: {{ include "openstack-cluster.nodegroup.mt.name" (list $ $nodeGroup) }}
+  labels:
+    {{- include "openstack-cluster.componentLabels" (list $ "worker") | nindent 4 }}
+    {{ $.Values.projectPrefix }}/node-group: {{ $nodeGroup.name }}
+  annotations:
+    {{ $.Values.projectPrefix }}/template-checksum: {{ include "openstack-cluster.nodegroup.mt.checksum" (list $ $nodeGroup) }}
+    # Cluster API complains when old templates disappear before it has rolled all the machines over
+    # When deploying with Helm, leave the resource behind and let Cluster API clean it up
+    helm.sh/resource-policy: keep
+    # Allow Argo to clean up old templates by ignoring the non-controller owner references,
+    # but only after the cluster has become healthy again
+    argocd.argoproj.io/sync-options: "ControllerReferencesOnly=true,PruneLast=true"
+spec: {{ include "openstack-cluster.nodegroup.mt.spec" (list $ $nodeGroup) | nindent 2 }}
+{{- end }}
