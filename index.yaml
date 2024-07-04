@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  openstack-cluster:
+  - apiVersion: v2
+    appVersion: main
+    created: "2024-07-04T19:55:24.940591841Z"
+    dependencies:
+    - alias: addons
+      condition: addons.enabled
+      name: cluster-addons
+      repository: file://../cluster-addons
+      version: '>=0-0'
+    description: Helm chart for deploying a cluster on an OpenStack cloud using Cluster
+      API.
+    digest: a1f5123a032c3c3d3f51dad9727b51891f0c9faeca0098afd8dafa17f36b1404
+    name: openstack-cluster
+    type: application
+    urls:
+    - https://github.com/mloza-tc/capi-helm-charts/releases/download/openstack-cluster-0.1.0/openstack-cluster-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-07-04T19:55:24.940620324Z"
