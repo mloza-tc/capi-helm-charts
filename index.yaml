@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  cluster-addons:
+  - apiVersion: v2
+    appVersion: main
+    created: "2024-07-11T20:31:43.150086085Z"
+    description: Helm chart that deploys cluster addons for a CAPI cluster.
+    digest: 2abc67d5cc95599cbcf68df2b9413e6b1bfdcf6a0badc1c94f0944598c972bf0
+    name: cluster-addons
+    type: application
+    urls:
+    - https://github.com/mloza-tc/capi-helm-charts/releases/download/cluster-addons-0.1.0/cluster-addons-0.1.0.tgz
+    version: 0.1.0
   openstack-cluster:
   - apiVersion: v2
     appVersion: main
@@ -18,4 +29,4 @@ entries:
     urls:
     - https://github.com/mloza-tc/capi-helm-charts/releases/download/openstack-cluster-0.1.0/openstack-cluster-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-04T19:55:24.940620324Z"
+generated: "2024-07-11T20:31:43.338091693Z"
