@@ -350,7 +350,7 @@ mellanoxNetworkOperator:
 # Settings for the node problem detector
 nodeProblemDetector:
   # Indicates if the node problem detector should be enabled
-  enabled: true
+  enabled: false
   chart:
     repo: https://charts.deliveryhero.io
     name: node-problem-detector
