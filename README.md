@@ -5,10 +5,10 @@
 This repository contains [Helm charts](https://helm.sh/) for deploying [Kubernetes](https://kubernetes.io/)
 clusters using [Cluster API](https://cluster-api.sigs.k8s.io/).
 
-The charts are available from the `stackhpc.github.io/capi-helm-charts` repository:
+The charts are available from the `mloza-tc.github.io/capi-helm-charts` repository:
 
 ```sh
-helm repo add capi https://stackhpc.github.io/capi-helm-charts
+helm repo add capi https://mloza-tc.github.io/capi-helm-charts
 helm install my-release capi/<chartname> [...options]
 ```
 
