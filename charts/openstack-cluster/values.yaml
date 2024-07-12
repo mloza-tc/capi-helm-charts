@@ -148,7 +148,7 @@ apiServer:
   #  - 123.123.123.123 # some other IPs
   # Indicates whether to associate a floating IP with the API server
   allowedCidrs:
-  #  - 10.248.13.0/24 # CAPO Management Cluster
+    - 10.248.13.0/24 # CAPO Management Cluster
     - 10.160.0.0/13
     - 10.168.0.0/13
     - 10.176.0.0/13
