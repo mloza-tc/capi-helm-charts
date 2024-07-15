@@ -19,7 +19,13 @@ cni:
       version: v3.27.3
     release:
       namespace: tigera-operator
-      values: {}
+      values: 
+        installation:
+          calicoNetwork:
+            ipPools:
+                cidr: 172.16.0.0/13
+                ipipMode: CrossSubnet
+                natOutgoing: true
     # Nova metadata service
     # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
     globalNetworkPolicy:
