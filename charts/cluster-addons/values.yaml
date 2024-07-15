@@ -7,7 +7,7 @@ clusterName:
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed
-  enabled: true
+  enabled: false
   # The CNI to deploy - supported values are calico or cilium
   type: calico
   # Settings for the calico CNI
@@ -19,13 +19,7 @@ cni:
       version: v3.27.3
     release:
       namespace: tigera-operator
-      values: 
-        installation:
-          calicoNetwork:
-            ipPools:
-                cidr: 172.16.0.0/13
-                ipipMode: CrossSubnet
-                natOutgoing: true
+      values:  {}
     # Nova metadata service
     # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
     globalNetworkPolicy:
