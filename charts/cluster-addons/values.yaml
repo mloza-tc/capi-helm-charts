@@ -9,7 +9,7 @@ cni:
   # Indicates if a CNI should be deployed
   enabled: true
   # The CNI to deploy - supported values are calico or cilium
-  type: cilium
+  type: calico
   # Settings for the calico CNI
   # See https://projectcalico.docs.tigera.io/getting-started/kubernetes/helm
   calico:
