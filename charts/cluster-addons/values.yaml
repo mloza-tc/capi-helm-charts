@@ -7,7 +7,7 @@ clusterName:
 # Settings for the CNI addon
 cni:
   # Indicates if a CNI should be deployed
-  enabled: false
+  enabled: true
   # The CNI to deploy - supported values are calico or cilium
   type: calico
   # Settings for the calico CNI
