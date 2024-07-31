@@ -13,17 +13,18 @@ stringData:
       nodeMetricsPort: 9091
       typhaMetricsPort: 9093
       calicoNetwork:
-        bgp: Disabled
+        #bgp: Disabled
+        bgp: Enabled
         nodeAddressAutodetectionV4:
           kubernetes: NodeInternalIP
         ipPools:
     {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
           - blockSize: 26
             cidr: {{ "{{" }} cidr {{ "}}" }}
-            disableBGPExport: false
-            encapsulation: VXLAN
-            natOutgoing: Enabled
-            nodeSelector: all()
+            #disableBGPExport: false
+            encapsulation: None
+            #natOutgoing: Enabled
+            #nodeSelector: all()
     {% endfor %}
   overrides: |
     {{- toYaml .Values.cni.calico.release.values | nindent 4 }}

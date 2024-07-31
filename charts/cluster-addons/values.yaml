@@ -19,23 +19,7 @@ cni:
       version: v3.27.3
     release:
       namespace: tigera-operator
-      values: |  
-        installation:
-          nodeMetricsPort: 9091
-          typhaMetricsPort: 9093
-          calicoNetwork:
-            bgp: Enabled
-            nodeAddressAutodetectionV4:
-              kubernetes: NodeInternalIP
-            ipPools:
-        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
-              - blockSize: 26
-                cidr: {{ "{{" }} cidr {{ "}}" }}
-                #disableBGPExport: false
-                encapsulation: None
-                #natOutgoing: Enabled
-                #nodeSelector: all()
-        {% endfor %}
+      values: {}
     # Nova metadata service
     # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
     globalNetworkPolicy:
