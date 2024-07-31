@@ -19,7 +19,7 @@ cni:
       version: v3.27.3
     release:
       namespace: tigera-operator
-      values:  
+      values: |  
         installation:
           nodeMetricsPort: 9091
           typhaMetricsPort: 9093
