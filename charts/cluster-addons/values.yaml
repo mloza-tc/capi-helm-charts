@@ -29,7 +29,7 @@ cni:
               kubernetes: NodeInternalIP
             ipPools:
         {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
-              - blockSize: 26
+                blockSize: 26
                 cidr: {{ "{{" }} cidr {{ "}}" }}
                 #disableBGPExport: false
                 #encapsulation: VXLAN
