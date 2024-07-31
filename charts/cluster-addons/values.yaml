@@ -28,7 +28,7 @@ cni:
             nodeAddressAutodetectionV4:
               kubernetes: NodeInternalIP
             ipPools:
-        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+                cidr: 172.16.0.0/13
                 blockSize: 26
                 cidr: {{ "{{" }} cidr {{ "}}" }}
                 #disableBGPExport: false
