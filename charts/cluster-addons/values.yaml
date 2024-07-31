@@ -24,17 +24,18 @@ cni:
           nodeMetricsPort: 9091
           typhaMetricsPort: 9093
           calicoNetwork:
-            #bgp: Disabled
+            bgp: Enabled
             nodeAddressAutodetectionV4:
               kubernetes: NodeInternalIP
             ipPools:
-              - cidr: 172.16.0.0/13
-                blockSize: 26
+        {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
+              - blockSize: 26
                 cidr: {{ "{{" }} cidr {{ "}}" }}
                 #disableBGPExport: false
-                #encapsulation: VXLAN
-                natOutgoing: Enabled
-                nodeSelector: all()
+                encapsulation: None
+                #natOutgoing: Enabled
+                #nodeSelector: all()
+        {% endfor %}
     # Nova metadata service
     # See https://docs.openstack.org/nova/latest/user/metadata.html#the-metadata-service
     globalNetworkPolicy:
