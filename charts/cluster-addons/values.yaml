@@ -90,7 +90,7 @@ openstack:
     # Indicates if the Cinder CSI should be enabled
     # By default, it is enabled if the OpenStack integrations are enabled
     # See https://github.com/kubernetes/cloud-provider-openstack/blob/master/charts/cinder-csi-plugin/values.yaml
-    enabled: true
+    enabled: false
     chart:
       repo: https://kubernetes.github.io/cloud-provider-openstack
       name: openstack-cinder-csi
