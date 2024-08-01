@@ -147,14 +147,14 @@ apiServer:
   #  - 10.10.0.0/16  # IPv4 Internal Network
   #  - 123.123.123.123 # some other IPs
   # Indicates whether to associate a floating IP with the API server
-  allowedCidrs:
-    - 10.248.13.0/24 # CAPO Management Cluster
-    - 10.160.0.0/13
-    - 10.168.0.0/13
-    - 10.176.0.0/13
-    - 192.168.6.0/23
-    - 192.168.160.0/20
-    - 10.0.74.0/24
+#  allowedCidrs:
+#    - 10.248.13.0/24 # CAPO Management Cluster
+#    - 10.160.0.0/13
+#    - 10.168.0.0/13
+#    - 10.176.0.0/13
+#    - 192.168.6.0/23
+#    - 192.168.160.0/20
+#    - 10.0.74.0/24
   associateFloatingIP: true
   # The specific floating IP to associate with the API server
   # If not given, a new IP will be allocated if required
