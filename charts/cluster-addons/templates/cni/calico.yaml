@@ -15,8 +15,8 @@ stringData:
       calicoNetwork:
         #bgp: Disabled
         bgp: Enabled
-        #nodeAddressAutodetectionV4:
-        #  kubernetes: NodeInternalIP
+        nodeAddressAutodetectionV4:
+          kubernetes: NodeInternalIP
         ipPools:
     {% for cidr in cluster.spec.clusterNetwork.pods.cidrBlocks %}
           - blockSize: 26

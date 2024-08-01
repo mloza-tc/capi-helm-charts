@@ -155,7 +155,7 @@ apiServer:
     - 192.168.6.0/23
     - 192.168.160.0/20
     - 10.0.74.0/24
-  associateFloatingIP: false
+  associateFloatingIP: true
   # The specific floating IP to associate with the API server
   # If not given, a new IP will be allocated if required
   floatingIP:
