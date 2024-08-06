@@ -1,6 +1,0 @@
-quay.io:
-  images:
-    cilium/cilium:
-    - v1.15.6
-    cilium/operator-generic:
-    - v1.15.6
